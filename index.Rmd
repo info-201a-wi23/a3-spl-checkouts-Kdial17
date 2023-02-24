@@ -4,83 +4,152 @@ output: html_document
 ---
 
 ### Introduction
-
-An introduction of the data and a description of the trends/books/items you are choosing to analyze (and why!)
+The data used in this assignment comes from the [Seattle Public Library](https://data.seattle.gov/Community/Checkouts-by-Title/tmmm-ytt6). This dataset has information about their checkouts which dates as far back as 2005. For this assignment it has been cut off until January of 2023 as the data for February hasn't been calculated full yet. I'm choosing to analyze the trends of books that have trended on TikTok to see how big of a role social media can play on influencing our society as of recently.
 
 ### Summary Information
+- Average checkouts: 242.3846
+- Month with the least checkouts: January
+- Lowest checkouts: 145
+- Month with the most checkouts: October
+- Most checkouts: 313
 
-Write a summary paragraph of findings that includes the 5 values calculated from your summary information R script
-
-These will likely be calculated using your DPLYR skills, answering questions such as:
-
-- What is the average number of checkouts for each item?
-- What is the month or year with the most/least checkouts for a book that you're interested in?
-- What is the month or year with the most/least checkouts for ebooks?
-- How has the number of print book checkouts changed over time?
-
-Feel free to calculate and report values that you find relevant.
+For the book Verity by Colleen Hoover, the average number of checkouts was 242.3846. The month with the highest checkouts of the Ebook version was October of 2022 which totaled to 313 checkouts. The month with the least checkouts was January of 2022 which was 1 checkout. Within this dataset, I noticed that for this specific author, her books were all available in the digital form (Ebooks/Audiobooks). There were no physical versions so I cannot report a trend of the print version's checkouts.
 
 ### The Dataset
 
-- Who collected/published the data?  
-- What are the parameters of the data (dates, number of checkouts, kinds of books, etc.)?
-- How was the data collected or generated?  
-- Why was the data collected?  
-- What, if any, ethical questions do you need to consider when working with this data?  
-- What are possible limitations or problems with this data?   (at least 200 words)
+This data was collected by Seattle Public Library and is published on the [Seattle Open Data page](https://data.seattle.gov/Community/Checkouts-by-Title/tmmm-ytt6) by the City of Seattle. This set also has data that goes as far back as 2005 and as recent as January of 2023. In addtion, it is being updated monthly with total number of checkouts for various books, as well as the date that it was checked out on and the medium it was checked out in. This data was collected while keeping each individual's identity and privacy secure and anonymous. Data that doesn't do so has a long history of being strictly enforced by companies like BookScan. They go as far as even refusing to sell this data to others doing research. This all goes to show much they care for and want to protect our privacy. The dataset was collected to assist people in aggregating trends and key findings of how book checkouts have changed over time. With key events and movements happening throughout the US, seeing how book checkouts have been influenced by it, can give us lots of great insight on our society.
 
+One ethical concern could be if there is any bias in collecting and the public's consent to the collection of such data. Prior to this assignment, I had no clue that Seattle Public Library was even collecting such data. This make me question if they have ever asked for consent in collecting such data, as well as is their any bias in the way they are collecting the data.
 
-### First Trends Over Time Chart
+One limitation of this dataset is that since we have no information on the demographics of the people that are checking out books, it would be very difficult to make larger claims about how events could shift the trends in book checkouts. For example, the Black Lives Matter movement. It wouldn't be accurate to claim that because of the movement, there was an increase in checkouts of Black authors' books throughout America. This data was collected from libraries in Seattle which means we should avoid overgeneralizing our findings to other states. Another problem with this dataset is that we have no way of knowing how the library sets up books for people to check out. The Seattle Public Library could be promoting certain books based on the way it's marketed or positioned in the library which would additionally make our conclusions on book trends inaccurate. Lastly, this dataset most likely isn’t representative of the population as a whole. Some people rely fully on libraries as that is the only resource they can access for information, while others may go to the library occasionally. Due to the inconsistencies, it would be hard again to further expand our findings across a larger group of people.
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
+### Chart 1
 
-The first chart that you will create and include will show the trend over time of your variable/topic/interest. Think carefully about what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
+```{r, echo = FALSE, message = FALSE, code = readLines("chart1.R")}
+library(dplyr)
+library(ggplot2)
+library(stringr)
 
-- Show more than one, but fewer than ~10 trends
-  - For example, two books, or 5 different mediums
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear - legend title
-In your .Rmd file, make sure to describe why you included the chart, and what patterns emerged
+spl_data <- read.csv("2022-2023-All-Checkouts-SPL-Data.csv", stringsAsFactors = FALSE)
 
-When we say "clear" or "human readable" titles and labels, that means that you should not just display the variable name.
+spl_df <- spl_data %>% mutate(date = paste0(CheckoutYear, "-", CheckoutMonth, "-01"))
+spl_df$date <- as.Date(spl_df$date, format = "%Y-%m-%d")
 
-Here's an example of how to run an R script inside an RMarkdown file:
+hoover_df <- spl_df %>% 
+  filter(str_detect(Creator, "Colleen Hoover"))
 
-``````{r, echo = FALSE, warning = FALSE, code = readLines("chart1_example.R")}
+hoover_verity <- hoover_df %>% 
+  filter(str_detect(Title, "Verity"))
+
+hoover_late_df <- hoover_df %>% 
+  filter(str_detect(Title, "Too Late"))
+
+chart_1 <- ggplot(data = hoover_verity) +
+  geom_smooth(aes(x = date, y = Checkouts, color = "Verity")) +
+  geom_smooth(data = hoover_late_df, aes(x = date, y = Checkouts, color = "Too Late")) +
+  labs(title = "Verity Checkouts Dominates Too Late", x = "Date", y = "Number of Checkouts", colour = "Book Title")
+chart_1
 ```
 
-### Second Trends Over Time Chart
+Chart 1 not only reveals the relationship between the number of checkouts for the books Too late and Verity and time, but it also shows us how much of a difference a book being promoted on social media can influence the number of checkouts. Both of these books were written by Colleen Hoover, however as shown in the chart, Verity soars in total number of checkouts in comparison to Too Late. Verity’s peak book checkout was revealed to be 313 in the month of October. This makes me infer that with the increasing popularity of the #booktok trend on tiktok, more people were inclined to checkout Verity. Furthermore, Too Late seems to have a slight decline in terms of checkout with its peak being 11 checkouts in March of 2022. 
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
+### Chart 2
 
-The second chart that you will create and include will show another trend over time of your variable/topic/interest. Think carefully about what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
+```{r, echo = FALSE, warning = FALSE, message = FALSE, code = readLines("chart2.R")}
+library(dplyr)
+library(ggplot2)
+library(stringr)
 
-- Show more than one, but fewer than ~10 trends
-  - For example, two books, or 5 different mediums
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear - legend title
-In your .Rmd file, make sure to describe why you included the chart, and what patterns emerged
+spl_data <- read.csv("2022-2023-All-Checkouts-SPL-Data.csv", stringsAsFactors = FALSE)
 
-When we say "clear" or "human readable" titles and labels, that means that you should not just display the variable name.
+spl_df <- spl_data %>% mutate(date = paste0(CheckoutYear, "-", CheckoutMonth, "-01"))
+spl_df$date <- as.Date(spl_df$date, format = "%Y-%m-%d")
 
-Here's an example of how to run an R script inside an RMarkdown file:
+hoover_df <- spl_df %>% filter(str_detect(Creator, "Colleen Hoover"))
 
-``````{r, echo = FALSE, code = readLines("chart2_example.R")}
+hoover_ends_df <- hoover_df %>%
+  filter(str_detect(Title, "It Ends with Us: A Novel"))
+
+silvera_df <- spl_df %>% 
+  filter(str_detect(Creator, "Adam Silvera"))
+
+silvera_end_df <- silvera_df %>% 
+  filter(str_detect(Title, "They Both Die at the End"))
+
+miller_df <- spl_df %>%
+  filter(str_detect(Creator, "Madeline Miller"))
+
+miller_song_df <- miller_df %>% 
+  filter(str_detect(Title, "The Song of Achilles"))
+
+reid_df <- spl_df %>%
+  filter(str_detect(Creator, "Taylor Jenkins Reid"))
+
+reid_hugo_df <- reid_df %>%
+  filter(str_detect(Title, "The Seven Husbands of Evelyn Hugo: A Novel"))
+
+chart_2 <- ggplot(data = hoover_ends_df) +
+  geom_smooth(aes(x = date, y = Checkouts, color = "It Ends with Us")) +
+  geom_smooth(data = silvera_end_df, aes(x = date, y = Checkouts, color = "They Both Die in the End")) +
+  geom_smooth(data = miller_song_df, aes(x = date, y = Checkouts, color = "The Song of Achilles")) +
+  geom_smooth(data = reid_hugo_df, aes(x = date, y = Checkouts, color = "The Seven Husbands of Evelyn Hugo")) +
+  labs(title = "Books promoted on TikTok have a greater number of Checkouts", x = "Date", y = "Number of Checkouts", colour = "Book Title") +
+  scale_y_continuous(breaks = seq(0, 400, 50))
+chart_2
 ```
 
-### Your Choice
+Similarly to the previous chart, chart 2 shows us how social media had some sort of influences over the checkouts of these books. It Ends with Us and The Seven Husbands of Evelyn Hugo were two of the most popular books promoted on social media namely, TikTok. The Song of Achilles and They Both Die in the End on the other hand, weren’t promoted as much in comparison despite being popular books. Looking at the chart, the large increase in checkouts for It Ends with Us and The Seven Husbands of Evelyn Hugo start around may-june of 2022. It Ends with Us had a peak of 247 checkouts and The Seven husbands of Evelyn Hugo had a peak of 335 checkouts. The Song of Achilles and They Both Die in the End however, have a more stagnant trend in checkouts with their peaks being at 135 and 27 checkouts respectively. Moreover, the fact that The Song of Achilles and They Both Die in the End didn’t see an increase around May-June like It Ends with Us and The Seven Husbands of Evelyn Hugo leads me to believe that these books also were promoted by users on TikTok as much.
 
-The last chart is up to you. It could be a line plot, scatter plot, histogram, bar plot, stacked bar plot, and more. Here are some requirements to help guide your design:
+### Chart 3
 
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear legend title
+```{r, echo = FALSE, message = FALSE, code = readLines("chart3.R")}
+library(dplyr)
+library(ggplot2)
+library(stringr)
 
-Here's an example of how to run an R script inside an RMarkdown file:
+spl_data <- read.csv("2022-2023-All-Checkouts-SPL-Data.csv", stringsAsFactors = FALSE)
 
-``````{r, echo = FALSE, code = readLines("chart2_example.R")}
+spl_df <- spl_data %>% mutate(date = paste0(CheckoutYear, "-", CheckoutMonth, "-01"))
+spl_df$date <- as.Date(spl_df$date, format = "%Y-%m-%d")
+
+hoover_df <- spl_df %>% 
+  filter(str_detect(Creator, "Colleen Hoover"))
+
+hoover_verity <- hoover_df %>% 
+  filter(str_detect(Title, "Verity"))
+
+reid_df <- spl_df %>%
+  filter(str_detect(Creator, "Taylor Jenkins Reid"))
+
+reid_hugo_df <- reid_df %>%
+  filter(str_detect(Title, "The Seven Husbands of Evelyn Hugo: A Novel"))
+
+reid_hugo_df$Title[str_detect(reid_hugo_df$Title, "The Seven Husbands of Evelyn Hugo: A Novel")] <- "The Seven Husbands of Evelyn Hugo"
+
+henry_df <- spl_df %>%
+  filter(str_detect(Creator, "Emily Henry"))
+
+henry_lovers_df <- henry_df %>%
+  filter(str_detect(Title, "Book Lovers"))
+
+henry_lovers_df$Title[str_detect(henry_lovers_df$Title, "Book Lovers")] <- "Book Lovers"
+
+sally_df <- spl_df %>%
+  filter(str_detect(Creator, "Sally Rooney"))
+
+sally_world_df <- sally_df %>%
+  filter(str_detect(Title, "Beautiful World, Where Are You: A Novel"))
+
+sally_world_df$Title[str_detect(sally_world_df$Title, "Beautiful World, Where Are You: A Novel")] <- "Beautiful World, Where Are You: A Novel"
+
+chart_3 <- ggplot(data = hoover_verity) +
+  geom_smooth(aes(x = date, y = Checkouts, color = "Verity")) +
+  geom_smooth(data = reid_hugo_df, aes(x = date, y = Checkouts, color = "The Seven Husbands of Evelyn Hugo")) +
+  geom_smooth(data = henry_lovers_df, aes(x = date, y = Checkouts, color = "Book Lovers")) +
+  geom_smooth(data = sally_world_df, aes(x = date, y = Checkouts, color = "Beautiful World, Where Are You: A Novel")) +
+  labs(title = "TikTok's Impact on Book Checkouts", x = "Date", y = "Number of Checkouts", colour = "Book Title") +
+  scale_y_continuous(breaks = seq(0, 500, 100))
+chart_3 
 ```
 
-
+This chart also shows how #booktok had a heavy influence on the types of books people were checking out. We know this because there is a sharp increase in book checkouts starting around May-June from the books that were being heavily recommended on not only TikTok but also other platforms like Instagram. This further highlights how much of an impact social media has on how the decisions we make as well as how it can truly transform the lives and results of people’s work. As we can see in the chart, Beautiful World, Where Are You, peaked at 329 checkouts in July, Book Lovers peaks at 427 in July, The Seven Husbands of Evelyn Hugo peaked at 335 in August, and Verity peaked at 313 checkouts in October. Another thing that is interesting to me is how the majority of these books peaked around July and tend to slowly decline after.
